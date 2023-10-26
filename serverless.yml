@@ -1,0 +1,84 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: api-capstone
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+#org: your-org-name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+frameworkVersion: '3'
+#variablesResolutionMode: 20210326
+
+provider:
+    name: aws
+    runtime: nodejs14.x
+    lambdaHashingVersion: 20201221
+    stage: ${opt:stage, 'development'}
+    region: ${env:AWS_REGION, 'us-east-1'}
+    # stackTags: ${file(./.tags.development.yml)}
+    stackTags: ${file(./.tags.${opt:stage, 'development'}.yml)}
+    profile: appliviov2
+
+    #vpc:
+    #    securityGroupIds: ${ssm:/sv/sg/${opt:stage, self:provider.stage, 'development'}/self_access}
+    #    subnetIds: ${ssm:/sv/vpc/${opt:stage, self:provider.stage, 'development'}/private_subnets_id}
+
+plugins:
+    - serverless-dotenv-plugin
+    - serverless-esbuild
+    - serverless-offline
+    - serverless-plugin-resource-tagging
+
+custom:
+    serverless-offline:
+        useChildProcesses: true
+        noPrependStageInUrl: true
+        httpPort: 3001
+
+    esbuild:
+        bundle: true
+        minify: false
+        sourcemap: true
+        exclude: ['aws-sdk']
+        target: node14
+        define:
+            require.resolve: undefined
+        platform: node
+        concurrency: 10
+        watch:
+            pattern: ['src/**/*.ts']
+        external: ['pg-native']
+
+functions:
+    hello:
+        handler: src/app.handler
+        timeout: 29
+        events:
+            - http:
+                  path: /
+                  method: ANY
+            - http:
+                  path: /auth/check
+                  method: GET
+                  cors:
+                      origin: ${file(./.cors.yml):${opt:stage}_origin}
+                      allowCredentials: true
+            - http:
+                  path: /user/user
+                  method: GET
+                  cors:
+                      origin: ${file(./.cors.yml):${opt:stage}_origin}
+                      allowCredentials: true
+            

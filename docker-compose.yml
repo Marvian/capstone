@@ -1,0 +1,45 @@
+version: '3.7'
+
+services:
+    db:
+        image: postgres:13.5-alpine
+        environment:
+            POSTGRES_PASSWORD: admin
+        volumes:
+            - pg13.5_data:/var/lib/postgresql/data
+        ports:
+            - 5433:5432
+
+    capstone-app:
+        #image: node:16.19.0-alpine3.17
+        environment:
+            AWS_PROFILE: appliviov2 
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        #command:  sls offline start --host 0.0.0.0 --stage development
+        container_name: capstone-app
+        volumes:
+            - ./:/app
+            - /home/jhonathan/.aws/:/home/node/.aws/
+            # - ~/.aws/:/home/node/.aws/
+        ports:
+            # Externo:Interno
+            - 3030:3001
+        tty: true
+
+    pgadmin:
+        image: dpage/pgadmin4
+        environment:
+            - PGADMIN_DEFAULT_EMAIL=admin@gmail.com
+            - PGADMIN_DEFAULT_PASSWORD=admin
+        volumes:
+            - pgadmin-data:/var/lib/pgadmin
+        ports:
+            - 5050:80
+
+volumes:
+    pg13.5_data:
+        external: false
+    pgadmin-data:
+        external: false

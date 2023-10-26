@@ -1,0 +1,13 @@
+**/.git
+**/.svn
+**/.hg
+**/node_modules
+**/package.json
+**/package-lock.json
+**/tsconfig.json
+**/public
+**/build
+**/.vscode
+**/Makefile
+**/README.md
+**/.esbuild
